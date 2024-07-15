@@ -1,37 +1,53 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdbool.h>
+#include <string.h>
 
 void readStream(FILE* fp);
 
 int main(int argc, char* argv[]){
-    char* filename;
+    char* filenames[argc];
     bool fileFlag = false;
     int option;
 
-    while ((option = getopt(argc, argv, "-n")) != -1){
-        printf("Option: %c\n", option);
+    int i = 0;
+    while ((option = getopt(argc, argv, "-nb")) != -1){
         switch (option){
             case 'n':
                 printf("Option n\n");
                 break;
+            case 'b':
+                printf("Option b\n");
+                break;
             case 1:
                 fileFlag = true;
-                filename = optarg;
+                filenames[i] = optarg;
                 break;
             case '?':
                 printf("Invalid option\n");
                 break;
         }
+        i++;
     }
     
-    if (fileFlag == false){
-        printf("No file specified\n");
-        return 1;
+    FILE* fp = stdin;
+    if (fileFlag == true){
+        for (int j = 0; j < i; j++){
+            if (strcmp(filenames[j], "-") != 0){
+                fp = fopen(filenames[j], "r");
+            }
+            if (fp == NULL){
+                perror("Error opening file.\n");
+                return 1;
+            }
+            readStream(fp);
+            fclose(fp);
+            printf("\n");
+        }
     }
-    FILE* fp = fopen(filename, "r");
-    readStream(fp);
-    close(fp);
+    else{
+        readStream(fp);
+    }
     
     return 0;
 }
