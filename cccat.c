@@ -74,12 +74,20 @@ void readStream(FILE* fp, char option){
                 lineCount++;
                 int length = snprintf(NULL, 0, "%d", lineCount);        // https://stackoverflow.com/questions/8257714/how-can-i-convert-an-int-to-a-string-in-c
                 prefix = (char*) malloc(length + 2);        // length + 2 because must accomodate for th null terminator and the tab character
+                if (prefix == NULL){
+                    perror("Error allocating memory");
+                    return 1;
+                }
                 snprintf(prefix, length + 2, "%d\t", lineCount);
             }
             else if (charBuffer == '\n'){
                 lineCount++;
                 int length = snprintf(NULL, 0, "%d", lineCount);        // https://stackoverflow.com/questions/8257714/how-can-i-convert-an-int-to-a-string-in-c
                 suffix = (char*) malloc(length + 2);        // length + 2 because must accomodate for th null terminator and the tab character
+                if (suffix == NULL){
+                    perror("Error allocating memory");
+                    return 1;
+                }
                 snprintf(suffix, length + 2, "%d\t", lineCount);
             }
         }
@@ -89,6 +97,10 @@ void readStream(FILE* fp, char option){
                 lineCount++;
                 int length = snprintf(NULL, 0, "%d", lineCount);        // https://stackoverflow.com/questions/8257714/how-can-i-convert-an-int-to-a-string-in-c
                 prefix = (char*) malloc(length + 2);        // length + 2 because must accomodate for th null terminator and the tab character
+                if (prefix == NULL){
+                    perror("Error allocating memory");
+                    return 1;
+                }
                 snprintf(prefix, length + 2, "%d\t", lineCount);
                 newLine = false;
             }
