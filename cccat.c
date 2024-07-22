@@ -48,7 +48,7 @@ int main(int argc, char* argv[]){
             }
             readStream(fp, option);
             fclose(fp);
-            return 0;
+            printf("\n");
         }
     }
     else{
@@ -61,14 +61,12 @@ int main(int argc, char* argv[]){
 void readStream(FILE* fp, char option){
     unsigned int lineCount = 0;
     wint_t charBuffer;
-    char* prefix = NULL;
-    char* suffix = NULL;
+    char* prefix = "";
+    char* suffix = "";
     bool newLine = true;
 
     while ((charBuffer = fgetwc(fp)) != WEOF){
 
-        prefix = "";
-        suffix = "";
         if (option == 'n'){
             if (lineCount == 0){
                 prefix = addLineCount(&lineCount);
@@ -91,11 +89,13 @@ void readStream(FILE* fp, char option){
 
         printf("%s%c%s", prefix, charBuffer, suffix);
 
-        if (prefix != NULL){
+        if (prefix != ""){
             free(prefix);
+            prefix = "";
         }
-        if (suffix != NULL){
+        if (suffix != ""){
             free(suffix);
+            suffix = "";
         }
     }
 
