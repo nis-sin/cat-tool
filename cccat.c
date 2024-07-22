@@ -61,8 +61,8 @@ int main(int argc, char* argv[]){
 void readStream(FILE* fp, char option){
     unsigned int lineCount = 0;
     wint_t charBuffer;
-    char* prefix;
-    char* suffix;
+    char* prefix = (char*) malloc(1);
+    char* suffix = (char*) malloc(1);
     bool newLine = true;
 
     while ((charBuffer = fgetwc(fp)) != WEOF){
@@ -71,10 +71,8 @@ void readStream(FILE* fp, char option){
         suffix = "";
         if (option == 'n'){
             if (lineCount == 0){
-                lineCount++;
-                int length = snprintf(NULL, 0, "%d", lineCount);        // https://stackoverflow.com/questions/8257714/how-can-i-convert-an-int-to-a-string-in-c
-                prefix = (char*) malloc(length + 2);        // length + 2 because must accomodate for th null terminator and the tab character
-                snprintf(prefix, length + 2, "%d\t", lineCount);
+                addLineCount(prefix, lineCount);
+                printf("PREFIX: %s", prefix);
             }
             else if (charBuffer == '\n'){
                 lineCount++;
@@ -109,7 +107,16 @@ void readStream(FILE* fp, char option){
 unsigned int addLineCount(char* concatenateStr, unsigned int lineCount){
     lineCount++;
     int length = snprintf(NULL, 0, "%d", lineCount);        // https://stackoverflow.com/questions/8257714/how-can-i-convert-an-int-to-a-string-in-c
-    concatenateStr = (char*) malloc(length + 2);        // length + 2 because must accomodate for th null terminator and the tab character
-    snprintf(concatenateStr, length + 2, "%d\t", lineCount);
+    char* tempStr = (char*) malloc(length + 2);        // length + 2 because must accomodate for th null terminator and the tab character
+    if (tempStr == NULL){
+        perror("Error allocating memory");
+        return 1;
+    }
+    snprintf(tempStr, length + 2, "%d\t", lineCount);
+    printf("TEMPSTR: %s\n", tempStr);
+    concatenateStr = (char*) realloc(concatenateStr, length + 2);
+    memcpy(concatenateStr, tempStr, length + 2);
+    printf("STR: %s\n", concatenateStr);
+    free(tempStr);
     return lineCount;
 }
