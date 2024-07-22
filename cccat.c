@@ -7,7 +7,7 @@
 #include <locale.h>
 
 void readStream(FILE* fp, char option);
-unsigned int addLineCount(char* concatenateStr, unsigned int lineCount);
+char* addLineCount(unsigned int* lineCount);
 
 int main(int argc, char* argv[]){
     char* filenames[argc];
@@ -48,7 +48,7 @@ int main(int argc, char* argv[]){
             }
             readStream(fp, option);
             fclose(fp);
-            printf("\n");
+            return 0;
         }
     }
     else{
@@ -61,8 +61,8 @@ int main(int argc, char* argv[]){
 void readStream(FILE* fp, char option){
     unsigned int lineCount = 0;
     wint_t charBuffer;
-    char* prefix = (char*) malloc(1);
-    char* suffix = (char*) malloc(1);
+    char* prefix = NULL;
+    char* suffix = NULL;
     bool newLine = true;
 
     while ((charBuffer = fgetwc(fp)) != WEOF){
@@ -71,23 +71,16 @@ void readStream(FILE* fp, char option){
         suffix = "";
         if (option == 'n'){
             if (lineCount == 0){
-                addLineCount(prefix, lineCount);
-                printf("PREFIX: %s", prefix);
+                prefix = addLineCount(&lineCount);
             }
             else if (charBuffer == '\n'){
-                lineCount++;
-                int length = snprintf(NULL, 0, "%d", lineCount);        // https://stackoverflow.com/questions/8257714/how-can-i-convert-an-int-to-a-string-in-c
-                suffix = (char*) malloc(length + 2);        // length + 2 because must accomodate for th null terminator and the tab character
-                snprintf(suffix, length + 2, "%d\t", lineCount);
+                suffix = addLineCount(&lineCount);
             }
         }
 
         else if (option == 'b'){
             if (newLine == true && !iswspace(charBuffer)){
-                lineCount++;
-                int length = snprintf(NULL, 0, "%d", lineCount);        // https://stackoverflow.com/questions/8257714/how-can-i-convert-an-int-to-a-string-in-c
-                prefix = (char*) malloc(length + 2);        // length + 2 because must accomodate for th null terminator and the tab character
-                snprintf(prefix, length + 2, "%d\t", lineCount);
+                prefix = addLineCount(&lineCount);
                 newLine = false;
             }
 
@@ -97,6 +90,13 @@ void readStream(FILE* fp, char option){
         }
 
         printf("%s%c%s", prefix, charBuffer, suffix);
+
+        if (prefix != NULL){
+            free(prefix);
+        }
+        if (suffix != NULL){
+            free(suffix);
+        }
     }
 
     if (!feof(fp)){
@@ -104,19 +104,24 @@ void readStream(FILE* fp, char option){
     }
 }
 
-unsigned int addLineCount(char* concatenateStr, unsigned int lineCount){
-    lineCount++;
-    int length = snprintf(NULL, 0, "%d", lineCount);        // https://stackoverflow.com/questions/8257714/how-can-i-convert-an-int-to-a-string-in-c
-    char* tempStr = (char*) malloc(length + 2);        // length + 2 because must accomodate for th null terminator and the tab character
+char* addLineCount(unsigned int* lineCount){
+    *lineCount = *lineCount + 1;
+    int length = snprintf(NULL, 0, "%d", *lineCount) + 2;        // https://stackoverflow.com/questions/8257714/how-can-i-convert-an-int-to-a-string-in-c
+    char* tempStr = (char*) malloc(length);        // length + 2 because must accomodate for th null terminator and the tab character
+
     if (tempStr == NULL){
         perror("Error allocating memory");
-        return 1;
+        exit(1);
     }
-    snprintf(tempStr, length + 2, "%d\t", lineCount);
-    printf("TEMPSTR: %s\n", tempStr);
-    concatenateStr = (char*) realloc(concatenateStr, length + 2);
-    memcpy(concatenateStr, tempStr, length + 2);
-    printf("STR: %s\n", concatenateStr);
+
+    snprintf(tempStr, length, "%d\t", *lineCount);
+    char* result = strdup(tempStr);             // https://stackoverflow.com/questions/252782/strdup-what-does-it-do-in-c
     free(tempStr);
-    return lineCount;
+
+    if (result == NULL){
+        perror("Error allocating memory");
+        exit(1);
+    }
+
+    return result;
 }
