@@ -1,1 +1,1 @@
-This is a clone cat tool, following of challenges from [coding challenges fyi](https://codingchallenges.fyi/challenges/challenge-cat).
+This is a clone cat tool, from the [coding challenges fyi](https://codingchallenges.fyi/challenges/challenge-cat) by John Crickett. I have written this in C because I would like to learn more about it.
